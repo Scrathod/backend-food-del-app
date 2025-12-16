@@ -42,15 +42,50 @@ const removeFromCart = async (req,res) => {
 }
 
 // fetch user cart data
-const getCart = async (req,res) => {
+// fetch user cart data
+const getCart = async (req, res) => {
     try {
-        let userData = await userModel.findById(req.body.userId);
-        let cartData = await userData.cartData;
-        res.json({success:true,cartData})
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID is missing"
+            });
+        }
+
+        const userData = await userModel.findById(userId);
+
+        if (!userData) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.json({
+            success: true,
+            cartData: userData.cartData || {}
+        });
+
     } catch (error) {
-        console.log(error)
-        res.json({success:false,message:"Error"})
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
     }
-}
+};
+
+// const getCart = async (req,res) => {
+//     try {
+//         let userData = await userModel.findById(req.body.userId);
+//         let cartData = await userData.cartData;
+//         res.json({success:true,cartData})
+//     } catch (error) {
+//         console.log(error)
+//         res.json({success:false,message:"Error"})
+//     }
+// }
 
 export {addToCart,removeFromCart,getCart}
